@@ -26,3 +26,25 @@ export interface CreatePaymentResponse {
 export interface HealthResponse {
   message: string;
 }
+
+
+
+export interface WebhookConfig {
+  target_url: string;
+  updated_at: string | null;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  payment_id: string;
+  event_type: string;
+  payload: Record<string, unknown>;
+  target_url: string;
+  status: "pending" | "delivered" | "failed";
+  attempt: number;
+  response_status: number | null;
+  response_body: string | null;
+  created_at: string;
+  delivered_at: string | null;
+}
+​  

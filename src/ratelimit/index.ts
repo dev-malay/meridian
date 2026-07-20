@@ -1,8 +1,5 @@
-type Request = import("express").Request;
-type Response = import("express").Response;
-type NextFunction = import("express").NextFunction;
 const pino = require("pino");
-import { rateLimiterDenied } from "../metrics/index.js";
+const { rateLimiterDenied } = require("../metrics/index");
 
 const logger = pino();
 
@@ -21,8 +18,8 @@ export class RateLimiter {
     this.windowMs = windowMs;
   }
 
-  middleware(): (req: Request, res: Response, next: NextFunction) => void {
-    return (req: Request, res: Response, next: NextFunction) => {
+  middleware(): (req: any, res: any, next: any) => void {
+    return (req: any, res: any, next: any) => {
       const clientIP = req.ip ?? req.socket.remoteAddress ?? "unknown";
 
       this.store

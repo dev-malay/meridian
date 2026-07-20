@@ -66,6 +66,15 @@ export function createWorker(
       concurrency,
     },
   );
+  worker.on("completed", (job: any) => {
+    workerJobsTotal.inc({ queue: queueName, result: "completed" });
+    logger.info({ payment_id: job?.data?.payment_id, queue: queueName }, "worker completed payment");
+  });
+
+  worker.on("failed", (job: any, err: Error) => {
+    workerJobsTotal.inc({ queue: queueName, result: "failed" });
+    logger.error({ payment_id: job?.data?.payment_id, queue: queueName, error: err.message  }, "worker failed payment");
+  })
 
   return worker
 }

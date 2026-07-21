@@ -295,6 +295,58 @@ export class Service {
     }
   }
 
+  async runOutboxPoller(
+    ctx: { signal: AbortSignal },
+    intervalMs: number,
+    batchSize: number,
+  ): Promise<void> {
+    logger.info({ intervalMs }, "starting outbox poller");
+
+    while (true) {
+      if (ctx.signal.aborted) return;
+
+      try {
+        const events = await this.store.fetchUnpublishedOutboxEvents(ctx, batchSize);
+
+        for (const ev of events) {
+          try {
+    const queueMap: Record<string, any> = {
+              critical: this.criticalQueue,
+              default: this.defaultQueue,
+              low: this.lowQueue,
+            };
+
+            const p = await this.store.getPaymentByID(ctx, ev.payment_id);
+            const queue = pickQueue(queueMap, p.amount);
+
+            const maxRetriesEnv = process.env.MAX_RETRIES;
+            const maxRetries = maxRetriesEnv ? parseInt(maxRetriesEnv, 10) : 8;
+
+            await queue.add(
+              "payment:process",
+              { payment_id: ev.payment_id },
+              {
+                jobId: ev.payment_id,
+                attempts: maxRetries,
+                backoff: { type: "exponential" as const, delay: 15000 },
+              },
+            );
+
+            await this.store.markOutboxEventPublished(ctx, ev.id);
+            outboxEventsPublished.inc();
+            logger.info({ payment_id: ev.payment_id, outbox_id: ev.id }, "outbox event published");
+          } catch (err) {
+            outboxEventsFailed.inc();
+            logger.error({ outbox_id: ev.id, payment_id: ev.payment_id, error: err }, "outbox publish failed");
+          }
+        }
+
+      } catch (err) { logger.error({ error: err }, "outbox poller query failes")}
+
+      await sleep(ctx, intervalMs);
+    }
+  }
+
   async pollQueueDepth(ctx: { signal: AbortSignal }, intervalMs: number): Promise<void> {
     const queues: Record<string, any> = {
       critical: this.criticalQueue,

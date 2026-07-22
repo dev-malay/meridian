@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/header.tsx","./src/components/logs.tsx","./src/components/paymentdetail.tsx","./src/components/paymentform.tsx","./src/components/paymentstable.tsx","./src/components/systeminfo.tsx","./src/components/toast.tsx","./src/components/webhooks.tsx","./src/hooks/useapi.ts","./src/types/index.ts"],"version":"5.9.3"}

@@ -1,14 +1,11 @@
-const pino = require("pino") as typeof import("pino");
-type Logger = import("pino").Logger;
-type StreamEntry = import("pino").StreamEntry;
+const pino = require("pino");
 const fs = require("fs");
 const path = require("path");
-type EnvConfig = import("./config").EnvConfig;
 
-export function initLogger(env: EnvConfig): Logger {
+export function initLogger(env: any): any {
   const level = env.logLevel === "DEBUG" ? "debug" : "info";
 
-  const streams: StreamEntry[] = [
+  const streams: any[] = [
     { stream: pino.destination({ fd: 1 }) },
   ];
 

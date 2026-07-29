@@ -1,12 +1,13 @@
-const pino = require("pino");
-const { webhookDeliveriesTotal, webhookDeliveryDuration } = require("../metrics/index");
+import pino from "pino";
+import type { Store } from "../store/index";
+import { webhookDeliveriesTotal, webhookDeliveryDuration } from "../metrics/index";
 
 const logger = pino();
 
 export class WebhookDeliveryService {
-  private store: any;
+  private store: Store;
 
-  constructor(store: any) {
+  constructor(store: Store) {
     this.store = store;
   }
 

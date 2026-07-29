@@ -1,7 +1,8 @@
-const express = require("express");
-const request = require("supertest");
-const { APIHandler } = require("../src/handler/handler");
-const { Status } = require("../src/payment/types");
+import express, { Request, Response, NextFunction } from "express";
+import request from "supertest";
+import { APIHandler } from "../src/handler/handler";
+import { Status } from "../src/payment/types";
+import type { StoreService } from "../src/handler/handler";
 
 function createMockService() {
   return {
@@ -13,18 +14,18 @@ function createMockService() {
   };
 }
 
-function createApp(handler: any): any {
+function createApp(handler: APIHandler): express.Application {
   const app = express();
   app.use(express.json());
 
-  app.get("/v1/health", (req: any, res: any) => handler.health(req, res));
-  app.post("/v1/payments", (req: any, res: any, next: any) => {
+  app.get("/v1/health", (req: Request, res: Response) => handler.health(req, res));
+  app.post("/v1/payments", (req: Request, res: Response, next: NextFunction) => {
     handler.createPayment(req, res).catch(next);
   });
-  app.get("/v1/payments/:id", (req: any, res: any, next: any) => {
+  app.get("/v1/payments/:id", (req: Request, res: Response, next: NextFunction) => {
     handler.getPaymentByID(req, res).catch(next);
   });
-  app.post("/v1/payments/:id/retry", (req: any, res: any, next: any) => {
+  app.post("/v1/payments/:id/retry", (req: Request, res: Response, next: NextFunction) => {
     handler.retryPayment(req, res).catch(next);
   });
 
@@ -47,9 +48,9 @@ describe("APIHandler", () => {
         updated_at: new Date(),
       };
 
-      (mockSvc.createPaymentWithOutbox as any).mockResolvedValue({ payment, created: true });
+      mockSvc.createPaymentWithOutbox.mockResolvedValue({ payment, created: true });
 
-      const handler = new APIHandler(mockSvc);
+      const handler = new APIHandler(mockSvc, {} as StoreService);
       const app = createApp(handler);
 
       const res = await request(app)
@@ -63,7 +64,7 @@ describe("APIHandler", () => {
 
     it("returns 400 for invalid JSON body", async () => {
       const mockSvc = createMockService();
-      const handler = new APIHandler(mockSvc);
+      const handler = new APIHandler(mockSvc, {} as StoreService);
       const app = createApp(handler);
 
       const res = await request(app)
@@ -87,9 +88,9 @@ describe("APIHandler", () => {
         updated_at: new Date(),
       };
 
-      (mockSvc.createPaymentWithOutbox as any).mockResolvedValue({ payment, created: false });
+      mockSvc.createPaymentWithOutbox.mockResolvedValue({ payment, created: false });
 
-      const handler = new APIHandler(mockSvc);
+      const handler = new APIHandler(mockSvc, {} as StoreService);
       const app = createApp(handler);
 
       const res = await request(app)
@@ -116,9 +117,9 @@ describe("APIHandler", () => {
         updated_at: new Date(),
       };
 
-      (mockSvc.getPaymentByID as any).mockResolvedValue(payment);
+      mockSvc.getPaymentByID.mockResolvedValue(payment);
 
-      const handler = new APIHandler(mockSvc);
+      const handler = new APIHandler(mockSvc, {} as StoreService);
       const app = createApp(handler);
 
       const res = await request(app).get("/v1/payments/pay-1");
@@ -128,9 +129,9 @@ describe("APIHandler", () => {
 
     it("returns 404 when payment not found", async () => {
       const mockSvc = createMockService();
-      (mockSvc.getPaymentByID as any).mockRejectedValue(new Error("payment not found"));
+      mockSvc.getPaymentByID.mockRejectedValue(new Error("payment not found"));
 
-      const handler = new APIHandler(mockSvc);
+      const handler = new APIHandler(mockSvc, {} as StoreService);
       const app = createApp(handler);
 
       const res = await request(app).get("/v1/payments/nonexistent");
@@ -141,9 +142,9 @@ describe("APIHandler", () => {
   describe("RetryPayment", () => {
     it("returns queued on success", async () => {
       const mockSvc = createMockService();
-      (mockSvc.retryFailedPayment as any).mockResolvedValue(undefined);
+      mockSvc.retryFailedPayment.mockResolvedValue(undefined);
 
-      const handler = new APIHandler(mockSvc);
+      const handler = new APIHandler(mockSvc, {} as StoreService);
       const app = createApp(handler);
 
       const res = await request(app).post("/v1/payments/pay-1/retry");
@@ -153,9 +154,9 @@ describe("APIHandler", () => {
 
     it("returns 404 when task not found", async () => {
       const mockSvc = createMockService();
-      (mockSvc.retryFailedPayment as any).mockRejectedValue(new Error("task not found"));
+      mockSvc.retryFailedPayment.mockRejectedValue(new Error("task not found"));
 
-      const handler = new APIHandler(mockSvc);
+      const handler = new APIHandler(mockSvc, {} as StoreService);
       const app = createApp(handler);
 
       const res = await request(app).post("/v1/payments/pay-1/retry");
@@ -163,5 +164,3 @@ describe("APIHandler", () => {
     });
   });
 });
-
-export {}

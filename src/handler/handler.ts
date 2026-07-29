@@ -1,9 +1,10 @@
-const express = require("express");
+import express, { Request, Response, NextFunction } from "express";
+import pino from "pino";
+import { z } from "zod";
+import { Status } from "../payment/types";
+import type { WebhookConfig, WebhookDelivery, Payment } from "../store/index";
+
 const Router = express.Router;
-const pino = require("pino");
-const { z } = require("zod");
-const _paymentTypes = require("../payment/types");
-const Status = _paymentTypes.Status;
 
 const logger = pino();
 
@@ -20,18 +21,18 @@ export interface PaymentService {
   createPaymentWithOutbox(
     ctx: { signal: AbortSignal },
     params: { amount: number; status: string; idempotency_key: string },
-  ): Promise<{ payment: any; created: boolean }>;
-  getPaymentByID(ctx: { signal: AbortSignal }, id: string): Promise<any>;
+  ): Promise<{ payment: Payment; created: boolean }>;
+  getPaymentByID(ctx: { signal: AbortSignal }, id: string): Promise<Payment>;
   enqueuePayment(ctx: { signal: AbortSignal }, paymentID: string): Promise<void>;
   retryFailedPayment(ctx: { signal: AbortSignal }, paymentID: string): Promise<void>;
   emitWebhookDelivery(ctx: { signal: AbortSignal }, paymentID: string): Promise<void>;
 }
 
 export interface StoreService {
-  getWebhookConfig(ctx: { signal: AbortSignal }): Promise<any>;
+  getWebhookConfig(ctx: { signal: AbortSignal }): Promise<WebhookConfig | null>;
   upsertWebhookConfig(ctx: { signal: AbortSignal }, targetUrl: string): Promise<void>;
-  getWebhookDeliveries(ctx: { signal: AbortSignal }, limit: number, offset: number): Promise<any[]>;
-  getWebhookDeliveryByID(ctx: { signal: AbortSignal }, id: string): Promise<any>;
+  getWebhookDeliveries(ctx: { signal: AbortSignal }, limit: number, offset: number): Promise<WebhookDelivery[]>;
+  getWebhookDeliveryByID(ctx: { signal: AbortSignal }, id: string): Promise<WebhookDelivery>;
 }
 
 export class APIHandler {
@@ -43,11 +44,11 @@ export class APIHandler {
     this.store = store;
   }
 
-  health(_req: any, res: any): void {
+  health(_req: Request, res: Response): void {
     res.json({ message: "don't worry about me, mate" });
   }
 
-  async createPayment(req: any, res: any): Promise<void> {
+  async createPayment(req: Request, res: Response): Promise<void> {
     const parseResult = createPaymentSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({ error: "validation failed, invalid request body" });
@@ -70,7 +71,7 @@ export class APIHandler {
     res.status(202).json({ payment: result.payment, created: true, enqueued: false });
   }
 
-  async getPaymentByID(req: any, res: any): Promise<void> {
+  async getPaymentByID(req: Request, res: Response): Promise<void> {
     const id = req.params.id;
     const ctx = { signal: new AbortController().signal };
 
@@ -93,7 +94,7 @@ export class APIHandler {
     }
   }
 
-  async retryPayment(req: any, res: any): Promise<void> {
+  async retryPayment(req: Request, res: Response): Promise<void> {
     const id = req.params.id;
     const ctx = { signal: new AbortController().signal };
 
@@ -115,9 +116,7 @@ export class APIHandler {
     }
   }
 
-  // ─── Webhook config ───────────────────────────────────────
-
-  async getWebhookConfig(_req: any, res: any): Promise<void> {
+  async getWebhookConfig(_req: Request, res: Response): Promise<void> {
     const ctx = { signal: new AbortController().signal };
     try {
       const config = await this.store.getWebhookConfig(ctx);
@@ -128,7 +127,7 @@ export class APIHandler {
     }
   }
 
-  async setWebhookConfig(req: any, res: any): Promise<void> {
+  async setWebhookConfig(req: Request, res: Response): Promise<void> {
     const parseResult = webhookConfigSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({ error: "invalid target_url" });
@@ -145,9 +144,7 @@ export class APIHandler {
     }
   }
 
-  // ─── Webhook deliveries ───────────────────────────────────
-
-  async getWebhookDeliveries(req: any, res: any): Promise<void> {
+  async getWebhookDeliveries(req: Request, res: Response): Promise<void> {
     const ctx = { signal: new AbortController().signal };
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
     const offset = parseInt(req.query.offset as string) || 0;
@@ -160,7 +157,7 @@ export class APIHandler {
     }
   }
 
-  async retryWebhookDelivery(req: any, res: any): Promise<void> {
+  async retryWebhookDelivery(req: Request, res: Response): Promise<void> {
     const id = req.params.id;
     const ctx = { signal: new AbortController().signal };
 
@@ -185,30 +182,30 @@ export class APIHandler {
   }
 }
 
-export function setupRouter(handler: APIHandler): any {
+export function setupRouter(handler: APIHandler): express.Router {
   const router = Router();
 
-  router.get("/v1/health", (req: any, res: any) => handler.health(req, res));
-  router.post("/v1/payments", (req: any, res: any, next: any) => {
+  router.get("/v1/health", (req: Request, res: Response) => handler.health(req, res));
+  router.post("/v1/payments", (req: Request, res: Response, next: NextFunction) => {
     handler.createPayment(req, res).catch(next);
   });
-  router.get("/v1/payments/:id", (req: any, res: any, next: any) => {
+  router.get("/v1/payments/:id", (req: Request, res: Response, next: NextFunction) => {
     handler.getPaymentByID(req, res).catch(next);
   });
-  router.post("/v1/payments/:id/retry", (req: any, res: any, next: any) => {
+  router.post("/v1/payments/:id/retry", (req: Request, res: Response, next: NextFunction) => {
     handler.retryPayment(req, res).catch(next);
   });
 
-  router.get("/v1/webhooks/config", (req: any, res: any, next: any) => {
+  router.get("/v1/webhooks/config", (req: Request, res: Response, next: NextFunction) => {
     handler.getWebhookConfig(req, res).catch(next);
   });
-  router.post("/v1/webhooks/config", (req: any, res: any, next: any) => {
+  router.post("/v1/webhooks/config", (req: Request, res: Response, next: NextFunction) => {
     handler.setWebhookConfig(req, res).catch(next);
   });
-  router.get("/v1/webhooks/deliveries", (req: any, res: any, next: any) => {
+  router.get("/v1/webhooks/deliveries", (req: Request, res: Response, next: NextFunction) => {
     handler.getWebhookDeliveries(req, res).catch(next);
   });
-  router.post("/v1/webhooks/deliveries/:id/retry", (req: any, res: any, next: any) => {
+  router.post("/v1/webhooks/deliveries/:id/retry", (req: Request, res: Response, next: NextFunction) => {
     handler.retryWebhookDelivery(req, res).catch(next);
   });
 

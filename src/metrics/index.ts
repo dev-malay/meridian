@@ -1,6 +1,5 @@
-const prometheus = require("prom-client");
-
-// ─── HTTP / API ────────────────────────────────────────────
+import prometheus from "prom-client";
+import type { Request, Response } from "express";
 
 export const httpRequestsTotal = new prometheus.Counter({
   name: "http_requests_total",
@@ -15,12 +14,10 @@ export const httpRequestDuration = new prometheus.Histogram({
   buckets: prometheus.exponentialBuckets(0.001, 2, 12),
 });
 
-// ─── Payments Pipeline ─────────────────────────────────────
-
 export const paymentsCreatedTotal = new prometheus.Counter({
   name: "payments_created_total",
   help: "Payments created (new vs duplicate idempotency key)",
-  labelNames: ["result"] as const, // new | duplicate
+  labelNames: ["result"] as const,
 });
 
 export const paymentsAmount = new prometheus.Histogram({
@@ -53,8 +50,6 @@ export const paymentsByStatus = new prometheus.Gauge({
   labelNames: ["status"] as const,
 });
 
-// ─── Outbox ────────────────────────────────────────────────
-
 export const outboxEventsCreated = new prometheus.Counter({
   name: "outbox_events_created_total",
   help: "Outbox events created",
@@ -75,19 +70,15 @@ export const outboxPendingGauge = new prometheus.Gauge({
   help: "Current number of pending (unpublished) outbox events",
 });
 
-// ─── Reconciliation ────────────────────────────────────────
-
 export const reconciledTotal = new prometheus.Counter({
   name: "payments_reconciled_total",
   help: "Stuck payments re-enqueued by reconciliation job",
 });
 
-// ─── Worker / Queue ────────────────────────────────────────
-
 export const workerJobsTotal = new prometheus.Counter({
   name: "worker_jobs_total",
   help: "Worker jobs processed by queue and result",
-  labelNames: ["queue", "result"] as const, // completed | failed
+  labelNames: ["queue", "result"] as const,
 });
 
 export const workerJobDuration = new prometheus.Histogram({
@@ -103,8 +94,6 @@ export const queueDepth = new prometheus.Gauge({
   labelNames: ["queue"] as const,
 });
 
-// ─── Provider ──────────────────────────────────────────────
-
 export const providerCallsTotal = new prometheus.Counter({
   name: "provider_calls_total",
   help: "Provider calls by HTTP status code",
@@ -118,19 +107,15 @@ export const providerLatency = new prometheus.Histogram({
   buckets: prometheus.exponentialBuckets(0.005, 2, 10),
 });
 
-// ─── Rate Limiter ──────────────────────────────────────────
-
 export const rateLimiterDenied = new prometheus.Counter({
   name: "rate_limiter_denied_total",
   help: "Requests denied by rate limiter",
 });
 
-// ─── Webhooks ──────────────────────────────────────────────
-
 export const webhookDeliveriesTotal = new prometheus.Counter({
   name: "webhook_deliveries_total",
   help: "Webhook deliveries by result",
-  labelNames: ["result"] as const, // delivered | failed
+  labelNames: ["result"] as const,
 });
 
 export const webhookDeliveryDuration = new prometheus.Histogram({
@@ -139,15 +124,13 @@ export const webhookDeliveryDuration = new prometheus.Histogram({
   buckets: prometheus.exponentialBuckets(0.01, 2, 10),
 });
 
-// ─── System ────────────────────────────────────────────────
-
 export const up = new prometheus.Gauge({
   name: "up",
   help: "1 if the server is accepting requests, 0 otherwise",
 });
 
-export function metricsHandler(): (req: any, res: any) => void {
-  return async (_req: any, res: any) => {
+export function metricsHandler(): (req: Request, res: Response) => void {
+  return async (_req: Request, res: Response) => {
     res.set("Content-Type", prometheus.register.contentType);
     res.end(await prometheus.register.metrics());
   };

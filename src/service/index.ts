@@ -1,11 +1,9 @@
-const pino = require("pino");
-const bullmq = require("bullmq");
-const Queue = bullmq.Queue;
-const _paymentTypes = require("../payment/types");
-const Status = _paymentTypes.Status;
-const _providerClient = require("./provider-client");
-const ProviderClient = _providerClient.ProviderClient;
-const {
+import pino from "pino";
+import { Queue } from "bullmq";
+import { Status } from "../payment/types";
+import { ProviderClient } from "./provider-client";
+import type { Store, Payment } from "../store/index";
+import {
   paymentsTotal,
   retryAttempts,
   queueDepth,
@@ -17,8 +15,8 @@ const {
   outboxEventsFailed,
   reconciledTotal,
   providerCallsTotal,
-} = require("../metrics/index");
-const { injectTraceContext } = require("../tracing/index");
+} from "../metrics/index";
+import { injectTraceContext } from "../tracing/index";
 
 const logger = pino();
 
@@ -28,7 +26,7 @@ function determineQueue(amount: number): string {
   return "default";
 }
 
-function pickQueue(queues: Record<string, any>, amount: number): any {
+function pickQueue(queues: Record<string, Queue>, amount: number): Queue {
   const name = determineQueue(amount);
   const q = queues[name];
   if (!q) throw new Error(`unknown queue: ${name}`);
@@ -36,18 +34,18 @@ function pickQueue(queues: Record<string, any>, amount: number): any {
 }
 
 export class Service {
-  private store: any;
-  private providerClient: any;
-  private criticalQueue: any;
-  private defaultQueue: any;
-  private lowQueue: any;
+  private store: Store;
+  private providerClient: ProviderClient;
+  private criticalQueue: Queue;
+  private defaultQueue: Queue;
+  private lowQueue: Queue;
 
   constructor(
-    paymentStore: any,
-    providerClient: any,
-    criticalQueue: any,
-    defaultQueue: any,
-    lowQueue: any,
+    paymentStore: Store,
+    providerClient: ProviderClient,
+    criticalQueue: Queue,
+    defaultQueue: Queue,
+    lowQueue: Queue,
   ) {
     this.store = paymentStore;
     this.providerClient = providerClient;
@@ -58,15 +56,15 @@ export class Service {
 
   async createPayment(
     ctx: { signal: AbortSignal },
-    params: any,
-  ): Promise<{ payment: any; created: boolean }> {
+    params: { amount: number; status: string; idempotency_key: string },
+  ): Promise<{ payment: Payment; created: boolean }> {
     return this.store.createPayment(ctx, params);
   }
 
   async createPaymentWithOutbox(
     ctx: { signal: AbortSignal },
-    params: any,
-  ): Promise<{ payment: any; created: boolean }> {
+    params: { amount: number; status: string; idempotency_key: string },
+  ): Promise<{ payment: Payment; created: boolean }> {
     const result = await this.store.createPaymentWithOutbox(ctx, params);
 
     paymentsCreatedTotal.inc({ result: result.created ? "new" : "duplicate" });
@@ -78,7 +76,7 @@ export class Service {
     return result;
   }
 
-  async getPaymentByID(ctx: { signal: AbortSignal }, id: string): Promise<any> {
+  async getPaymentByID(ctx: { signal: AbortSignal }, id: string): Promise<Payment> {
     return this.store.getPaymentByID(ctx, id);
   }
 
@@ -87,7 +85,7 @@ export class Service {
     const maxRetriesEnv = process.env.MAX_RETRIES;
     const maxRetries = maxRetriesEnv ? parseInt(maxRetriesEnv, 10) : 8;
 
-    const queueMap: Record<string, any> = {
+    const queueMap: Record<string, Queue> = {
       critical: this.criticalQueue,
       default: this.defaultQueue,
       low: this.lowQueue,
@@ -211,7 +209,7 @@ export class Service {
 
   async retryFailedPayment(ctx: { signal: AbortSignal }, paymentID: string): Promise<void> {
     const p = await this.store.getPaymentByID(ctx, paymentID)
-    const queueMap: Record<string, any> = {
+    const queueMap: Record<string, Queue> = {
       critical: this.criticalQueue,
       default: this.defaultQueue,
       low: this.lowQueue,
@@ -310,7 +308,7 @@ export class Service {
 
         for (const ev of events) {
           try {
-    const queueMap: Record<string, any> = {
+    const queueMap: Record<string, Queue> = {
               critical: this.criticalQueue,
               default: this.defaultQueue,
               low: this.lowQueue,
@@ -348,7 +346,7 @@ export class Service {
   }
 
   async pollQueueDepth(ctx: { signal: AbortSignal }, intervalMs: number): Promise<void> {
-    const queues: Record<string, any> = {
+    const queues: Record<string, Queue> = {
       critical: this.criticalQueue,
       default: this.defaultQueue,
       low: this.lowQueue,

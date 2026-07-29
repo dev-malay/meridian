@@ -1,4 +1,4 @@
-const dotenv = require("dotenv");
+import dotenv from "dotenv";
 
 export interface EnvConfig {
   providerBaseURL: string;

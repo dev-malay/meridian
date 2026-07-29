@@ -1,11 +1,12 @@
-const pino = require("pino");
+import Redis from "ioredis";
+import pino from "pino";
 
 const logger = pino();
 
 export class RedisLimiterStore {
-  private rdb: any;
+  private rdb: Redis;
 
-  constructor(rdb: any) {
+  constructor(rdb: Redis) {
     this.rdb = rdb;
   }
 

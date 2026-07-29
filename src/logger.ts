@@ -1,11 +1,12 @@
-const pino = require("pino");
-const fs = require("fs");
-const path = require("path");
+import pino from "pino";
+import fs from "fs";
+import path from "path";
+import type { EnvConfig } from "./config";
 
-export function initLogger(env: any): any {
+export function initLogger(env: EnvConfig): pino.Logger {
   const level = env.logLevel === "DEBUG" ? "debug" : "info";
 
-  const streams: any[] = [
+  const streams: { stream: pino.DestinationStream }[] = [
     { stream: pino.destination({ fd: 1 }) },
   ];
 

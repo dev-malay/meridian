@@ -1,9 +1,9 @@
-const express = require("express");
-const { v4: uuidv4 } = require("uuid");
-const dotenv = require("dotenv");
-const pino = require("pino");
-const fs = require("fs");
-const path = require("path");
+import express, { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
+import dotenv from "dotenv";
+import pino from "pino";
+import fs from "fs";
+import path from "path";
 
 export {};
 
@@ -14,10 +14,9 @@ if (result.error) {
 
 const logLevel = process.env.LOG_LEVEL === "DEBUG" ? "debug" : "info";
 
-const streams: any[] = [{ stream: pino.destination({ fd: 1 }) }];
+const streams: { stream: pino.DestinationStream }[] = [{ stream: pino.destination({ fd: 1 }) }];
 
 const logFilePath = process.env.LOG_FILE_PATH;
-// console.log("logFilePath", logFilePath);
 if (logFilePath) {
   const dir = path.dirname(logFilePath);
   try {
@@ -41,11 +40,11 @@ const logger = pino(
 const app = express();
 const port = process.env.MOCK_PROVIDER_PORT || "3000";
 
-app.get("/health", (_req: any, res: any) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({ message: "don't worry about me, mate" });
 });
 
-app.all("*", (_req: any, res: any) =>{
+app.all("*", (_req: Request, res: Response) =>{
   const n = Math.random() * 100;
   if (n < 80) {
     res.json({ provider_ref: uuidv4() });

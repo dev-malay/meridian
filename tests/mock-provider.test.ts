@@ -1,15 +1,15 @@
-const express = require("express");
-const request = require("supertest");
-const { v4: uuidv4 } = require("uuid");
+import express, { Request, Response } from "express";
+import request from "supertest";
+import { v4 as uuidv4 } from "uuid";
 
-function createMockProviderApp(): any {
+function createMockProviderApp(): express.Application {
   const app = express();
 
-  app.get("/health", (_req: any, res: any) => {
+  app.get("/health", (_req: Request, res: Response) => {
     res.json({ message: "don't worry about me, mate" });
   });
 
-  app.all("*", (_req: any, res: any) => {
+  app.all("*", (_req: Request, res: Response) => {
     const n = Math.random() * 100;
 
     if (n < 80) {
@@ -58,5 +58,3 @@ describe("MockProvider", () => {
     expect(found200).toBe(true);
   });
 });
-
-export {}

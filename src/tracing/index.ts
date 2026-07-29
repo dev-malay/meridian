@@ -1,12 +1,12 @@
-const { diag, DiagConsoleLogger, DiagLogLevel, context, trace, propagation } = require("@opentelemetry/api");
-const { NodeTracerProvider, SimpleSpanProcessor } = require("@opentelemetry/sdk-trace-node");
-const { resourceFromAttributes } = require("@opentelemetry/resources");
-const { SemanticResourceAttributes } = require("@opentelemetry/semantic-conventions");
-const { OTLPTraceExporter } = require("@opentelemetry/exporter-trace-otlp-http");
+import { diag, DiagConsoleLogger, DiagLogLevel, context, trace, propagation, Tracer, Context } from "@opentelemetry/api";
+import { NodeTracerProvider, SimpleSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { resourceFromAttributes } from "@opentelemetry/resources";
+import { SemanticResourceAttributes } from "@opentelemetry/semantic-conventions";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 
 const TRACEPARENT_KEY = "traceparent";
 
-let tracer: any = null;
+let tracer: Tracer | null = null;
 
 export function initTracing(serviceName: string, otlpEndpoint?: string, otlpAuthHeader?: string): void {
   if (tracer) return;
@@ -36,11 +36,11 @@ export function initTracing(serviceName: string, otlpEndpoint?: string, otlpAuth
   tracer = trace.getTracer(serviceName);
 }
 
-export function getTracer(): any {
+export function getTracer(): Tracer {
   if (!tracer) {
     tracer = trace.getTracer("meridian");
   }
-  return tracer!;
+  return tracer;
 }
 
 export function injectTraceContext<T extends Record<string, unknown>>(payload: T): T {
@@ -52,7 +52,7 @@ export function injectTraceContext<T extends Record<string, unknown>>(payload: T
   return payload;
 }
 
-export function extractTraceContext(payload: Record<string, unknown>): any {
+export function extractTraceContext(payload: Record<string, unknown>): Context {
   const traceparent = payload?.[TRACEPARENT_KEY];
   if (typeof traceparent === "string") {
     const carrier: Record<string, string> = { traceparent };

@@ -1,25 +1,22 @@
-const express = require("express");
-const pg = require("pg");
-const Redis = require("ioredis");
-const { Queue } = require("bullmq");
-const pino = require("pino");
+import express from "express";
+import pg from "pg";
+import Redis from "ioredis";
+import { Queue } from "bullmq";
+import pino from "pino";
 
-const { loadEnv } = require("./config");
-const { initLogger } = require("./logger");
-const { PostgresStore } = require("./store/postgres");
-const { ProviderClient } = require("./service/provider-client");
-const { Service } = require("./service/index");
-const { APIHandler, setupRouter } = require("./handler/handler");
-const { loggingMiddleware } = require("./handler/middleware");
-const { RateLimiter } = require("./ratelimit/index");
-const { RedisLimiterStore } = require("./ratelimit/redis-store");
-const { createWorker } = require("./worker/index");
-const { metricsHandler, up, paymentsByStatus, outboxPendingGauge } = require("./metrics/index");
-const { initTracing } = require("./tracing/index");
-const { WebhookDeliveryService } = require("./webhook/index");
-
-
-export {};
+import { loadEnv } from "./config";
+import { initLogger } from "./logger";
+import { PostgresStore } from "./store/postgres";
+import { ProviderClient } from "./service/provider-client";
+import { Service } from "./service/index";
+import { APIHandler, setupRouter } from "./handler/handler";
+import { loggingMiddleware } from "./handler/middleware";
+import { RateLimiter } from "./ratelimit/index";
+import { RedisLimiterStore } from "./ratelimit/redis-store";
+import { createWorker } from "./worker/index";
+import { metricsHandler, up, paymentsByStatus, outboxPendingGauge } from "./metrics/index";
+import { initTracing } from "./tracing/index";
+import { WebhookDeliveryService } from "./webhook/index";
 
 const logger = pino();
 
@@ -56,10 +53,10 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const paymentStore = new PostgresStore(dbPool as any);
+  const paymentStore = new PostgresStore(dbPool);
   const providerClient = new ProviderClient(env.providerBaseURL);
 
-  let redis: any;
+  let redis: Redis;
 
   if (env.redisURL) {
     redis = new Redis(env.redisURL, {
@@ -114,14 +111,11 @@ async function main(): Promise<void> {
     webhookBatchSize,
   )
 
-  // Set up metric
   up.set(1);
 
-  // poll payments_by_status 
   const statusPollAbort = new AbortController();
   const statusPollPromise = pollPaymentStatuses(dbPool, { signal: statusPollAbort.signal }, 10000, paymentStore);
 
-  // Poll outbox_pending_gauge
   const outboxGaugeAbort = new AbortController();
   const outboxGaugePromise = pollOutboxPending(dbPool, { signal: outboxGaugeAbort.signal }, 5000);
 
@@ -174,16 +168,16 @@ async function main(): Promise<void> {
 
     process.on("SIGINT", onAbort);
     process.on("SIGTERM", onAbort);
-    process.on("SIGBREAK", onAbort); 
+    process.on("SIGBREAK", onAbort);
   });
 
 }
 
 async function pollPaymentStatuses(
-  db: any,
+  db: pg.Pool,
   ctx: { signal: AbortSignal },
   intervalMs: number,
-  _store: any,
+  _store: PostgresStore,
 ): Promise<void> {
   while (true) {
     if (ctx.signal.aborted) return;
@@ -206,7 +200,7 @@ async function pollPaymentStatuses(
 }
 
 async function pollOutboxPending(
-  db: any,
+  db: pg.Pool,
   ctx: { signal: AbortSignal },
   intervalMs: number,
 ): Promise<void> {

@@ -1,6 +1,6 @@
-const { RateLimiter } = require("../src/ratelimit/index");
-const express = require("express");
-const request = require("supertest");
+import express, { Request, Response } from "express";
+import request from "supertest";
+import { RateLimiter } from "../src/ratelimit/index";
 
 describe("RateLimiter", () => {
   it("allows requests under the limit", async () => {
@@ -12,7 +12,7 @@ describe("RateLimiter", () => {
 
     const app = express();
     app.use(limiter.middleware());
-    app.get("/test", (_req: any, res: any) => res.json({ ok: true }));
+    app.get("/test", (_req: Request, res: Response) => res.json({ ok: true }));
 
     const res = await request(app).get("/test");
     expect(res.status).toBe(200);
@@ -26,12 +26,10 @@ describe("RateLimiter", () => {
 
     const app = express();
     app.use(limiter.middleware());
-    app.get("/test", (_req: any, res: any) => res.json({ ok: true }));
+    app.get("/test", (_req: Request, res: Response) => res.json({ ok: true }));
 
     const res = await request(app).get("/test");
     expect(res.status).toBe(429);
     expect(res.text).toBe("Too Many Requests");
   });
 });
-
-export {}

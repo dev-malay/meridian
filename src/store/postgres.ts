@@ -1,40 +1,37 @@
-const pg = require("pg");
-const { v4: uuidv4 } = require("uuid");
-const _paymentTypes = require("../payment/types");
-const PaymentStatus = _paymentTypes.Status;
-
-const { ErrInvalidStateTransition } = require("./index");
-const pino = require("pino");
-
-
+import pg from "pg";
+import { v4 as uuidv4 } from "uuid";
+import pino from "pino";
+import { Status as PaymentStatus } from "../payment/types";
+import { ErrInvalidStateTransition } from "./index";
+import type { Payment, CreatePaymentParams, OutboxEvent, WebhookConfig, WebhookDelivery } from "./index";
 
 const logger = pino();
 
-function scanPayment(row: any): any {
+function scanPayment(row: Record<string, unknown>): Payment {
   return {
-    id: row.id,
+    id: row.id as string,
     amount: Number(row.amount),
-    status: row.status,
-    idempotency_key: row.idempotency_key,
-    provider_ref: row.provider_ref ?? null,
-    attempts: row.attempts,
-    last_error: row.last_error ?? null,
-    created_at: row.created_at,
-    updated_at: row.updated_at,
+    status: row.status as string,
+    idempotency_key: row.idempotency_key as string,
+    provider_ref: (row.provider_ref as string) ?? null,
+    attempts: row.attempts as number,
+    last_error: (row.last_error as string) ?? null,
+    created_at: row.created_at as Date,
+    updated_at: row.updated_at as Date,
   }
 }
 
 export class PostgresStore {
-  private pool: any;
+  private pool: pg.Pool;
 
-  constructor(pool: any) {
+  constructor(pool: pg.Pool) {
     this.pool = pool;
   }
 
   async createPayment(
     _ctx: { signal: AbortSignal },
-    params: any,
-  ): Promise<{ payment: any; created: boolean }> {
+    params: CreatePaymentParams,
+  ): Promise<{ payment: Payment; created: boolean }> {
     const query = `
       insert into payments (id, amount, status, idempotency_key)
       values ($1, $2, $3, $4)
@@ -58,7 +55,7 @@ export class PostgresStore {
     }
   }
 
-  async getPaymentByID(_ctx: { signal: AbortSignal }, id: string): Promise<any> {
+  async getPaymentByID(_ctx: { signal: AbortSignal }, id: string): Promise<Payment> {
     const query = `
       select id, amount, status, idempotency_key, provider_ref, attempts, last_error, created_at, updated_at
       from payments where id = $1;
@@ -70,7 +67,7 @@ export class PostgresStore {
     return scanPayment(res.rows[0]);
   }
 
-  async getPaymentByIdempotencyKey(_ctx: { signal: AbortSignal }, key: string): Promise<any> {
+  async getPaymentByIdempotencyKey(_ctx: { signal: AbortSignal }, key: string): Promise<Payment> {
     const query = `
       select id, amount, status, idempotency_key, provider_ref, attempts, last_error, created_at, updated_at
       from payments where idempotency_key = $1 limit 1;
@@ -89,7 +86,7 @@ export class PostgresStore {
     toStatus: string,
     lastError: string,
     incrementAttempts: boolean,
-  ): Promise<any> {
+  ): Promise<Payment> {
     const query = `
       update payments
       set status = $1,
@@ -158,7 +155,7 @@ export class PostgresStore {
     _ctx: { signal: AbortSignal },
     since: Date,
     limit: number,
-  ): Promise<any[]> {
+  ): Promise<Payment[]> {
     const query = `
       select id, amount, status, idempotency_key, provider_ref, attempts, last_error, created_at, updated_at
       from payments
@@ -168,13 +165,13 @@ export class PostgresStore {
       limit $2;
     `;
     const res = await this.pool.query(query, [since.toISOString(), limit]);
-    return res.rows.map(scanPayment);
+    return res.rows.map((row: Record<string, unknown>) => scanPayment(row));
   }
 
   async createPaymentWithOutbox(
     _ctx: { signal: AbortSignal },
-    params: any,
-  ): Promise<{ payment: any; created: boolean }> {
+    params: CreatePaymentParams,
+  ): Promise<{ payment: Payment; created: boolean }> {
     const paymentID = uuidv4();
     const outboxID = uuidv4();
     const payload = JSON.stringify({ amount: params.amount, idempotency_key: params.idempotency_key });
@@ -217,7 +214,7 @@ export class PostgresStore {
   async fetchUnpublishedOutboxEvents(
     _ctx: { signal: AbortSignal },
     limit: number,
-  ): Promise<any[]> {
+  ): Promise<OutboxEvent[]> {
     const query = `
       select id, payment_id, event_type, payload, status, created_at, published_at
       from outbox_events
@@ -227,14 +224,14 @@ export class PostgresStore {
       for update skip locked;
     `;
     const res = await this.pool.query(query, [limit]);
-    return res.rows.map((row: any) => ({
-      id: row.id,
-      payment_id: row.payment_id,
-      event_type: row.event_type,
-      payload: typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload,
+    return res.rows.map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      payment_id: row.payment_id as string,
+      event_type: row.event_type as string,
+      payload: typeof row.payload === "string" ? JSON.parse(row.payload as string) : row.payload,
       status: row.status as "pending" | "published",
-      created_at: row.created_at,
-      published_at: row.published_at ?? null,
+      created_at: row.created_at as Date,
+      published_at: (row.published_at as Date) ?? null,
     }));
   }
 
@@ -250,13 +247,11 @@ export class PostgresStore {
     );
   }
 
-  // Webhook config 
-
-  async getWebhookConfig(_ctx: { signal: AbortSignal }): Promise<any> {
+  async getWebhookConfig(_ctx: { signal: AbortSignal }): Promise<WebhookConfig | null> {
     const query = `select target_url, updated_at from webhook_config where id = 1;`;
     const res = await this.pool.query(query);
     if (res.rows.length === 0) return null;
-    return { target_url: res.rows[0].target_url, updated_at: res.rows[0].updated_at };
+    return { target_url: res.rows[0].target_url as string, updated_at: res.rows[0].updated_at as Date };
   }
 
   async upsertWebhookConfig(_ctx: { signal: AbortSignal }, targetUrl: string): Promise<void> {
@@ -267,8 +262,6 @@ export class PostgresStore {
     `;
     await this.pool.query(query, [targetUrl]);
   }
-
-  // outbox events 
 
   async insertOutboxEvent(
     _ctx: { signal: AbortSignal },
@@ -286,7 +279,7 @@ export class PostgresStore {
   async fetchUnpublishedWebhookEvents(
     _ctx: { signal: AbortSignal },
     limit: number,
-  ): Promise<any[]> {
+  ): Promise<OutboxEvent[]> {
     const query = `
       select id, payment_id, event_type, payload, status, created_at, published_at
       from outbox_events
@@ -296,18 +289,16 @@ export class PostgresStore {
       for update skip locked;
     `;
     const res = await this.pool.query(query, [limit]);
-    return res.rows.map((row: any) => ({
-      id: row.id,
-      payment_id: row.payment_id,
-      event_type: row.event_type,
-      payload: typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload,
+    return res.rows.map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      payment_id: row.payment_id as string,
+      event_type: row.event_type as string,
+      payload: typeof row.payload === "string" ? JSON.parse(row.payload as string) : row.payload,
       status: row.status as "pending" | "published",
-      created_at: row.created_at,
-      published_at: row.published_at ?? null,
+      created_at: row.created_at as Date,
+      published_at: (row.published_at as Date) ?? null,
     }));
   }
-
-  // webhook deliveries 
 
   async createWebhookDelivery(
     _ctx: { signal: AbortSignal },
@@ -347,7 +338,7 @@ export class PostgresStore {
     _ctx: { signal: AbortSignal },
     limit: number,
     offset: number,
-  ): Promise<any[]> {
+  ): Promise<WebhookDelivery[]> {
     const query = `
       select id, payment_id, event_type, payload, target_url, status, attempt,
              response_status, response_body, created_at, delivered_at
@@ -356,22 +347,22 @@ export class PostgresStore {
       limit $1 offset $2;
     `;
     const res = await this.pool.query(query, [limit, offset]);
-    return res.rows.map((row: any) => ({
-      id: row.id,
-      payment_id: row.payment_id,
-      event_type: row.event_type,
-      payload: typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload,
-      target_url: row.target_url,
+    return res.rows.map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      payment_id: row.payment_id as string,
+      event_type: row.event_type as string,
+      payload: typeof row.payload === "string" ? JSON.parse(row.payload as string) : row.payload,
+      target_url: row.target_url as string,
       status: row.status as "pending" | "delivered" | "failed",
-      attempt: row.attempt,
-      response_status: row.response_status ?? null,
-      response_body: row.response_body ?? null,
-      created_at: row.created_at,
-      delivered_at: row.delivered_at ?? null,
+      attempt: row.attempt as number,
+      response_status: (row.response_status as number) ?? null,
+      response_body: (row.response_body as string) ?? null,
+      created_at: row.created_at as Date,
+      delivered_at: (row.delivered_at as Date) ?? null,
     }));
   }
 
-  async getWebhookDeliveryByID(_ctx: { signal: AbortSignal }, id: string): Promise<any> {
+  async getWebhookDeliveryByID(_ctx: { signal: AbortSignal }, id: string): Promise<WebhookDelivery> {
     const query = `
       select id, payment_id, event_type, payload, target_url, status, attempt,
              response_status, response_body, created_at, delivered_at
@@ -382,17 +373,17 @@ export class PostgresStore {
     if (res.rows.length === 0) throw new ErrInvalidStateTransition(`webhook delivery not found: ${id}`);
     const row = res.rows[0];
     return {
-      id: row.id,
-      payment_id: row.payment_id,
-      event_type: row.event_type,
-      payload: typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload,
-      target_url: row.target_url,
+      id: row.id as string,
+      payment_id: row.payment_id as string,
+      event_type: row.event_type as string,
+      payload: typeof row.payload === "string" ? JSON.parse(row.payload as string) : row.payload,
+      target_url: row.target_url as string,
       status: row.status as "pending" | "delivered" | "failed",
-      attempt: row.attempt,
-      response_status: row.response_status ?? null,
-      response_body: row.response_body ?? null,
-      created_at: row.created_at,
-      delivered_at: row.delivered_at ?? null,
+      attempt: row.attempt as number,
+      response_status: (row.response_status as number) ?? null,
+      response_body: (row.response_body as string) ?? null,
+      created_at: row.created_at as Date,
+      delivered_at: (row.delivered_at as Date) ?? null,
     };
   }
 }

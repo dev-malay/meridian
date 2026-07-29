@@ -1,8 +1,8 @@
-const Redis = require("ioredis");
-const { RedisLimiterStore } = require("../src/ratelimit/redis-store");
+import Redis from "ioredis";
+import { RedisLimiterStore } from "../src/ratelimit/redis-store";
 
 async function isRedisAvailable(): Promise<boolean> {
-  const testRedis = new Redis({ host: "localhost", port: 6379, maxRetriesPerRequest: null as any, retryStrategy: () => null as any, lazyConnect: true });
+  const testRedis = new Redis({ host: "localhost", port: 6379, maxRetriesPerRequest: null, retryStrategy: () => null, lazyConnect: true });
   try {
     await testRedis.connect();
     await testRedis.ping();
@@ -14,7 +14,7 @@ async function isRedisAvailable(): Promise<boolean> {
 }
 
 describe("RedisLimiterStore", () => {
-  let redis: any;
+  let redis: Redis;
   let redisAvailable: boolean;
 
   beforeAll(async () => {
@@ -22,7 +22,7 @@ describe("RedisLimiterStore", () => {
     if (!redisAvailable) {
       return;
     }
-    redis = new Redis({ host: "localhost", port: 6379, maxRetriesPerRequest: null as any });
+    redis = new Redis({ host: "localhost", port: 6379, maxRetriesPerRequest: null });
   });
 
   afterAll(async () => {
@@ -69,5 +69,3 @@ describe("RedisLimiterStore", () => {
     expect(allow2).toBe(true);
   }, 10000);
 });
-
-export {}

@@ -1,10 +1,11 @@
-const { context, trace, SpanStatusCode } = require("@opentelemetry/api");
-const { providerLatency } = require("../metrics/index");
-const { getTracer } = require("../tracing/index");
+import { context, trace, SpanStatusCode } from "@opentelemetry/api";
+import { providerLatency } from "../metrics/index";
+import { getTracer } from "../tracing/index";
 
 export interface ProviderResponse {
   providerRef: string;
-  statusCode: number;}
+  statusCode: number;
+}
 
 export class ProviderClient {
   private baseURL: string;
@@ -63,9 +64,9 @@ export class ProviderClient {
   }
 }
 
-function outcomeFromStatus(status: number): string{
+function outcomeFromStatus(status: number): string {
   if (status === 200) return "success";
   if (status === 422) return "terminal_error";
   if (status === 503) return "retryable_error";
   return `status_${status}`;
- }
+}

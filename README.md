@@ -1,4 +1,9 @@
-# meridian
+███╗   ███╗███████╗██████╗ ██╗██████╗ ██╗ █████╗ ███╗   ██╗
+████╗ ████║██╔════╝██╔══██╗██║██╔══██╗██║██╔══██╗████╗  ██║
+██╔████╔██║█████╗  ██████╔╝██║██║  ██║██║███████║██╔██╗ ██║
+██║╚██╔╝██║██╔══╝  ██╔══██╗██║██║  ██║██║██╔══██║██║╚██╗██║
+██║ ╚═╝ ██║███████╗██║  ██║██║██████╔╝██║██║  ██║██║ ╚████║
+╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝╚═╝╚═════╝ ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝
 
 A payment processing pipeline built with Node.js, TypeScript, Express, and BullMQ. Uses the transactional outbox pattern for reliable queueing, PostgreSQL for persistence, and includes a React frontend with real-time updates, comprehensive Prometheus metrics, and OpenTelemetry tracing.
 

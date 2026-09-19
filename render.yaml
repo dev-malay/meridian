@@ -7,6 +7,7 @@ services:
   - type: keyvalue
     name: meridian-redis
     plan: free
+    ipAllowList: [] 
 
   - type: web
     name: meridian-provider

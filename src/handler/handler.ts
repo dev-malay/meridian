@@ -186,6 +186,8 @@ export function setupRouter(handler: APIHandler): express.Router {
   const router = Router();
 
   router.get("/v1/health", (req: Request, res: Response) => handler.health(req, res));
+  router.get("/health", (req: Request, res: Response) => handler.health(req, res));
+  
   router.post("/v1/payments", (req: Request, res: Response, next: NextFunction) => {
     handler.createPayment(req, res).catch(next);
   });

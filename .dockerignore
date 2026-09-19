@@ -1,0 +1,12 @@
+node_modules
+dist
+frontend/node_modules
+frontend/dist
+logs
+*.log
+.git
+.gitignore
+.env
+.env.*
+docker-compose.yml
+meridian.requestly.json

@@ -41,8 +41,10 @@ async function main(): Promise<void> {
   initLogger(env);
   initTracing("meridian", process.env.OTLP_ENDPOINT, process.env.OTLP_AUTH_HEADER);
 
+  const needsSSL = env.databaseURL.includes("sslmode=require") || process.env.NODE_ENV === "production";
   const dbPool = new pg.Pool({
     connectionString: env.databaseURL,
+    ...(needsSSL ? { ssl: { rejectUnauthorized: false } } : {}),
   });
 
   try {
@@ -59,8 +61,9 @@ async function main(): Promise<void> {
   let redis: Redis;
 
   if (env.redisURL) {
+    const isTLS = env.redisURL.startsWith("rediss://");
     redis = new Redis(env.redisURL, {
-      tls: { servername: new URL(env.redisURL).hostname },
+      ...(isTLS ? { tls: { servername: new URL(env.redisURL).hostname } } : {}),
       maxRetriesPerRequest: null,
     });
   } else {

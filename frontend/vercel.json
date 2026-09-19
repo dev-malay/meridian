@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/v1/:path*", "destination": "https://meridian-backend-7aun.onrender.com/v1/:path*" },
+    { "source": "/metrics", "destination": "https://meridian-backend-7aun.onrender.com/metrics" }
+  ]
+}

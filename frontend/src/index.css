@@ -219,3 +219,151 @@
 .animate-fade {
   animation: fade-in 0.2s ease both;
 }
+
+/* --- Meridian landing (scoped; dashboard untouched) --- */
+.md-landing {
+  --m-bg: #14120b;
+  --m-panel: #1c1a13;
+  --m-panel-2: #211e16;
+  --m-surface: #26231a;
+  --m-border: #353226;
+  --m-border-soft: #25221a;
+  --m-text: #edecec;
+  --m-muted: #a6a49c;
+  --m-dim: #6f6d66;
+  --m-green: #22c55e;
+  --m-amber: #f59e0b;
+  --m-red: #ef4444;
+  --m-sky: #38bdf8;
+  background: var(--m-bg);
+  color: var(--m-text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+.md-landing .font-mono {
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+}
+
+@keyframes md-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.md-fade-up {
+  animation: md-fade-up 0.5s ease-out both;
+}
+
+.md-fade-up-1 { animation-delay: 0.05s; }
+.md-fade-up-2 { animation-delay: 0.13s; }
+.md-fade-up-3 { animation-delay: 0.21s; }
+.md-fade-up-4 { animation-delay: 0.29s; }
+
+/* motion stage decor */
+.md-stage-grid-bg {
+  background-image:
+    linear-gradient(rgba(237, 236, 236, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(237, 236, 236, 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(75% 85% at 50% 40%, black 25%, transparent 100%);
+  -webkit-mask-image: radial-gradient(75% 85% at 50% 40%, black 25%, transparent 100%);
+}
+
+.md-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+.md-orb-green {
+  width: 340px;
+  height: 340px;
+  left: -90px;
+  top: -70px;
+  background: rgba(34, 197, 94, 0.13);
+  animation: md-orb-a 11s ease-in-out infinite alternate;
+}
+
+.md-orb-amber {
+  width: 300px;
+  height: 300px;
+  right: -80px;
+  bottom: -40px;
+  background: rgba(245, 158, 11, 0.1);
+  animation: md-orb-b 13s ease-in-out infinite alternate;
+}
+
+@keyframes md-orb-a {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(60px, 40px) scale(1.15); }
+}
+
+@keyframes md-orb-b {
+  from { transform: translate(0, 0) scale(1.1); }
+  to { transform: translate(-50px, -30px) scale(1); }
+}
+
+.md-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: md-marquee 30s linear infinite;
+}
+
+@keyframes md-marquee {
+  to { transform: translateX(-50%); }
+}
+
+.md-float-chip {
+  animation: md-float-y 5s ease-in-out infinite;
+}
+
+@keyframes md-float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* vertical pipeline connector: dashes marching downward */
+.md-flow-line {
+  background-image: linear-gradient(to bottom, var(--m-green) 45%, transparent 45%);
+  background-size: 2px 10px;
+  background-repeat: repeat-y;
+  animation: md-flow 0.7s linear infinite;
+}
+
+@keyframes md-flow {
+  to { background-position-y: 10px; }
+}
+
+.md-packet {
+  animation: md-packet-drop 1.8s linear infinite;
+}
+
+@keyframes md-packet-drop {
+  from { transform: translateY(-4px); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  to { transform: translateY(28px); opacity: 0; }
+}
+
+.md-queue-bar {
+  transform-origin: left center;
+  animation: md-queue 3s ease-in-out infinite;
+}
+
+@keyframes md-queue {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-fade-up,
+  .md-orb-green,
+  .md-orb-amber,
+  .md-marquee-track,
+  .md-float-chip,
+  .md-flow-line,
+  .md-packet,
+  .md-queue-bar { animation: none; }
+}

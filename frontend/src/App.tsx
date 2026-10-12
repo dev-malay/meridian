@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ToastProvider } from "./components/Toast";
 import Header from "./components/Header";
 import PaymentForm from "./components/PaymentForm";
@@ -8,6 +8,8 @@ import PaymentsTable from "./components/PaymentsTable";
 import PaymentDetail from "./components/PaymentDetail";
 import Logs from "./components/Logs";
 import Webhooks from "./components/Webhooks";
+import { LandingPage } from "./landing/pages/LandingPage";
+import { AboutPage } from "./landing/pages/AboutPage";
 import { apiGet } from "./hooks/useApi";
 import type { Payment } from "./types";
 
@@ -144,14 +146,20 @@ function Dashboard() {
 }
 
 export default function App() {
+  const { pathname } = useLocation();
+  const isLanding = pathname === "/" || pathname === "/about";
+
   return (
     <ToastProvider>
       <div className="min-h-screen" style={{ background: "var(--color-base-900)" }}>
-        <Header />
+        {!isLanding && <Header />}
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/logs" element={<Logs />} />
           <Route path="/webhooks" element={<Webhooks />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </ToastProvider>

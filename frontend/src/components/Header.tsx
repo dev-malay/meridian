@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { apiGet } from "../hooks/useApi";
 import type { HealthResponse } from "../types";
-import { BarChart3, Webhook } from "lucide-react";
+import { BarChart3, LayoutDashboard, Webhook } from "lucide-react";
 
 export default function Header() {
   const [healthy, setHealthy] = useState<boolean | null>(null);
@@ -25,13 +25,22 @@ export default function Header() {
   }, [])
 
   const isLogs = location.pathname === "/logs"
+  const isWebhooks = location.pathname === "/webhooks"
+  const isDashboard = location.pathname === "/dashboard"
+
+  const navLink = (active: boolean) =>
+    `flex items-center gap-1.5 text-xs font-[400] px-3 py-1.5 rounded-md transition-all no-underline ${
+      active
+        ? "text-white bg-[rgba(255,255,255,0.06)]"
+        : "text-[var(--color-gray-400)] hover:text-[var(--color-gray-200)] hover:bg-[rgba(255,255,255,0.03)]"
+    }`;
 
 
   return (
     <header className="sticky top-0 z-40" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
       <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-3 no-underline">
+          <Link to="/dashboard" className="flex items-center gap-3 no-underline">
             <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
@@ -45,25 +54,15 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            to={isLogs ? "/" : "/logs"}
-            className={`flex items-center gap-1.5 text-xs font-[400] px-3 py-1.5 rounded-md transition-all no-underline ${
-              isLogs
-                ? "text-white bg-[rgba(255,255,255,0.06)]"
-                : "text-[var(--color-gray-400)] hover:text-[var(--color-gray-200)] hover:bg-[rgba(255,255,255,0.03)]"
-            }`}
-          >
+          <Link to="/dashboard" className={navLink(isDashboard)}>
+            <LayoutDashboard size={13} />
+            Dashboard
+          </Link>
+          <Link to="/logs" className={navLink(isLogs)}>
             <BarChart3 size={13} />
             Logs
           </Link>
-          <Link
-            to="/webhooks"
-            className={`flex items-center gap-1.5 text-xs font-[400] px-3 py-1.5 rounded-md transition-all no-underline ${
-              location.pathname === "/webhooks"
-                ? "text-white bg-[rgba(255,255,255,0.06)]"
-                : "text-[var(--color-gray-400)] hover:text-[var(--color-gray-200)] hover:bg-[rgba(255,255,255,0.03)]"
-            }`}
-          >
+          <Link to="/webhooks" className={navLink(isWebhooks)}>
             <Webhook size={13} />
             Webhooks
           </Link>

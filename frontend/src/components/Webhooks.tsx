@@ -83,11 +83,11 @@ export default function Webhooks() {
     <main className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-base font-[500] text-white tracking-tight flex items-center gap-2">
+          <h1 className="text-[17px] font-[500] text-[var(--color-gray-100)] tracking-tight flex items-center gap-2">
             <Webhook size={16} className="text-[var(--color-gray-400)]" />
             Webhooks
           </h1>
-          <p className="text-xs font-[400] text-[var(--color-gray-500)] mt-1">
+          <p className="text-[13px] font-[400] text-[var(--color-gray-500)] mt-1">
             Configure webhook endpoint and monitor delivery history
           </p>
         </div>
@@ -98,21 +98,21 @@ export default function Webhooks() {
 
       {/* ─── Config ─── */}
       <div className="card p-6 mb-6 animate-mount">
-        <h2 className="text-sm font-[500] text-white mb-4">Endpoint</h2>
+        <h2 className="text-[15px] font-[500] text-[var(--color-gray-100)] mb-4">Endpoint</h2>
         <div className="flex items-center gap-3">
           <input
             type="url"
             placeholder="https://example.com/webhooks/payment-completed"
             value={urlInput}
             onChange={(e) => setUrlInput(e.target.value)}
-            className="input text-sm flex-1"
+            className="input text-[15px] flex-1"
           />
           <button onClick={saveConfig} disabled={saving || !urlInput} className="btn btn-primary shrink-0">
             {saving ? "Saving…" : "Save"}
           </button>
         </div>
         {config.updated_at && (
-          <p className="text-xs font-[400] text-[var(--color-gray-500)] mt-3">
+          <p className="text-[13px] font-[400] text-[var(--color-gray-500)] mt-3">
             Last updated {new Date(config.updated_at).toLocaleString()}
           </p>
         )}
@@ -121,29 +121,29 @@ export default function Webhooks() {
       {/* ─── Deliveries ─── */}
       <div className="card p-6 animate-mount" style={{ animationDelay: "40ms" }}>
         <div className="flex items-center gap-2 mb-5">
-          <h2 className="text-sm font-[500] text-white">Deliveries</h2>
+          <h2 className="text-[15px] font-[500] text-[var(--color-gray-100)]">Deliveries</h2>
         </div>
 
         {loading ? (
           <div className="py-12 text-center">
-            <p className="text-sm font-[400] text-[var(--color-gray-400)]">Loading deliveries…</p>
+            <p className="text-[15px] font-[400] text-[var(--color-gray-400)]">Loading deliveries…</p>
           </div>
         ) : deliveries.length === 0 ? (
           <div className="py-12 text-center">
-            <p className="text-sm font-[400] text-[var(--color-gray-400)]">No webhook deliveries yet.</p>
-            <p className="text-xs font-[400] text-[var(--color-gray-500)] mt-1">Deliveries appear here after a payment reaches a terminal state (success or failed_final).</p>
+            <p className="text-[15px] font-[400] text-[var(--color-gray-400)]">No webhook deliveries yet.</p>
+            <p className="text-[13px] font-[400] text-[var(--color-gray-500)] mt-1">Deliveries appear here after a payment reaches a terminal state (success or failed_final).</p>
           </div>
         ) : (
           <>
             <div className="overflow-x-auto -mx-6">
-              <table className="w-full text-sm" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
+              <table className="w-full text-[15px]" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
                 <thead>
                   <tr>
                     {["Status", "Target URL", "Status Code", "Event", "Attempt", "Created", ""].map((h) => (
                       <th
                         key={h}
-                        className="text-left px-6 py-3 text-xs font-[500] text-[var(--color-gray-400)] whitespace-nowrap"
-                        style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                        className="text-left px-6 py-3 text-[13px] font-[500] text-[var(--color-gray-400)] whitespace-nowrap"
+                        style={{ borderBottom: "1px solid rgba(237,236,236,0.04)" }}
                       >
                         {h}
                       </th>
@@ -158,7 +158,7 @@ export default function Webhooks() {
                       <tr
                         key={d.id}
                         className="transition-all duration-100"
-                        style={{ borderBottom: "1px solid rgba(255,255,255,0.03)" }}
+                        style={{ borderBottom: "1px solid rgba(237,236,236,0.03)" }}
                       >
                         <td className="px-6 py-3">
                           <span className={`tag ${meta.css}`}>
@@ -168,7 +168,7 @@ export default function Webhooks() {
                         </td>
                         <td className="px-6 py-3">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-[400] text-[var(--color-gray-300)] font-mono max-w-[180px] truncate" title={d.target_url}>
+                            <span className="text-[13px] font-[400] text-[var(--color-gray-300)] font-mono max-w-[180px] truncate" title={d.target_url}>
                               {d.target_url}
                             </span>
                             {d.target_url && (
@@ -180,19 +180,19 @@ export default function Webhooks() {
                         </td>
                         <td className="px-6 py-3">
                           {d.response_status !== null ? (
-                            <span className={`text-xs font-mono font-[500] ${isError ? "text-[var(--color-red)]" : "text-[var(--color-green)]"}`}>
+                            <span className={`text-[13px] font-mono font-[500] ${isError ? "text-[var(--color-red)]" : "text-[var(--color-green)]"}`}>
                               {d.response_status}
                             </span>
                           ) : (
-                            <span className="text-xs font-[400] text-[var(--color-gray-500)]">—</span>
+                            <span className="text-[13px] font-[400] text-[var(--color-gray-500)]">—</span>
                           )}
                         </td>
-                        <td className="px-6 py-3 text-xs font-[400] text-[var(--color-gray-400)]">{d.event_type}</td>
-                        <td className="px-6 py-3 text-xs font-[400] text-[var(--color-gray-400)]">{d.attempt}</td>
-                        <td className="px-6 py-3 text-xs font-[400] text-[var(--color-gray-400)] font-mono">{new Date(d.created_at).toLocaleString()}</td>
+                        <td className="px-6 py-3 text-[13px] font-[400] text-[var(--color-gray-400)]">{d.event_type}</td>
+                        <td className="px-6 py-3 text-[13px] font-[400] text-[var(--color-gray-400)]">{d.attempt}</td>
+                        <td className="px-6 py-3 text-[13px] font-[400] text-[var(--color-gray-400)] font-mono">{new Date(d.created_at).toLocaleString()}</td>
                         <td className="px-6 py-3 text-right">
                           {d.status === "failed" && (
-                            <button onClick={() => handleRetry(d.id)} className="btn-ghost text-xs py-1.5 px-2.5">
+                            <button onClick={() => handleRetry(d.id)} className="btn-ghost text-[13px] py-1.5 px-2.5">
                               <RotateCcw size={11} />
                               Retry
                             </button>
@@ -206,13 +206,13 @@ export default function Webhooks() {
             </div>
 
             {showPagination && (
-              <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                <span className="text-xs font-[400] text-[var(--color-gray-500)]">
+              <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: "1px solid rgba(237,236,236,0.04)" }}>
+                <span className="text-[13px] font-[400] text-[var(--color-gray-500)]">
                   {page * PER_PAGE + 1}–{Math.min((page + 1) * PER_PAGE, deliveries.length)} of {deliveries.length}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} className="btn-ghost-muted p-1.5 disabled:opacity-20 disabled:cursor-not-allowed">‹</button>
-                  <span className="text-xs font-[400] text-[var(--color-gray-400)] px-2">{page + 1}</span>
+                  <span className="text-[13px] font-[400] text-[var(--color-gray-400)] px-2">{page + 1}</span>
                   <button onClick={() => setPage((p) => p + 1)} disabled={deliveries.length < PER_PAGE} className="btn-ghost-muted p-1.5 disabled:opacity-20 disabled:cursor-not-allowed">›</button>
                 </div>
               </div>
@@ -223,3 +223,4 @@ export default function Webhooks() {
     </main>
   );
 }
+

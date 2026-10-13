@@ -74,12 +74,12 @@ export default function PaymentDetail({ paymentId, onClose, onUpdate }: Props) {
     <div className="card p-6 animate-mount-scale">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-7 h-7 rounded-md bg-[rgba(255,255,255,0.04)]">
+          <div className="flex items-center justify-center w-7 h-7 rounded-md bg-[rgba(237,236,236,0.04)]">
             <Clock size={13} className="text-[var(--color-gray-400)]" />
           </div>
           <div>
-            <h2 className="text-sm font-[500] text-white">Payment Details</h2>
-            <p className="text-xs font-[400] text-[var(--color-gray-500)] font-mono mt-px">{payment.id.slice(0, 16)}…</p>
+            <h2 className="text-[15px] font-[500] text-[var(--color-gray-100)]">Payment Details</h2>
+            <p className="text-[13px] font-[400] text-[var(--color-gray-500)] font-mono mt-px">{payment.id.slice(0, 16)}…</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -94,10 +94,10 @@ export default function PaymentDetail({ paymentId, onClose, onUpdate }: Props) {
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
         {fields.map((f) => (
-          <div key={f.label} className="py-2.5 px-3" style={{ background: "rgba(255,255,255,0.015)", borderRadius: "6px" }}>
+          <div key={f.label} className="py-2.5 px-3" style={{ background: "rgba(237,236,236,0.015)", borderRadius: "6px" }}>
             <div className="label mb-1">{f.label}</div>
             <div
-              className={`${f.mono ? "font-mono" : ""} ${f.sm ? "text-xs" : "text-sm"} font-[400] ${
+              className={`${f.mono ? "font-mono" : ""} ${f.sm ? "text-[13px]" : "text-[15px]"} font-[400] ${
                 f.error ? "text-[var(--color-red)]" : f.muted ? "text-[var(--color-gray-400)]" : "text-[var(--color-gray-100)]"
               }`}
             >
@@ -108,7 +108,7 @@ export default function PaymentDetail({ paymentId, onClose, onUpdate }: Props) {
       </div>
 
       {canRetry && (
-        <button onClick={handleRetry} className="btn-ghost w-full mt-4 justify-center py-2.5 text-xs">
+        <button onClick={handleRetry} className="btn-ghost w-full mt-4 justify-center py-2.5 text-[13px]">
           <RotateCcw size={12} />
           Retry Payment
         </button>
@@ -117,3 +117,4 @@ export default function PaymentDetail({ paymentId, onClose, onUpdate }: Props) {
   )
   
 }
+

@@ -151,7 +151,7 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <div className="min-h-screen" style={{ background: "var(--color-base-900)" }}>
+      <div className="min-h-screen" style={{ background: "var(--color-black)" }}>
         {!isLanding && <Header />}
         <Routes>
           <Route path="/" element={<LandingPage />} />

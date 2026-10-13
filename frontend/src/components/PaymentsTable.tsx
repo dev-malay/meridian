@@ -77,12 +77,12 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
       <div className="card p-6 animate-mount" style={{ animationDelay: "80ms" }}>
         <div className="flex items-center gap-2 mb-6">
           <Database size={14} className="text-[var(--color-gray-400)]" />
-          <h2 className="text-sm font-[500] text-white">Payments</h2>
+          <h2 className="text-[15px] font-[500] text-[var(--color-gray-100)]">Payments</h2>
         </div>
         <div className="py-16 text-center">
           <div className="text-3xl mb-4 opacity-[0.04] select-none">—</div>
-          <p className="text-sm font-[400] text-[var(--color-gray-400)]">No payments yet</p>
-          <p className="text-xs font-[400] text-[var(--color-gray-500)] mt-1">Create one to get started.</p>
+          <p className="text-[15px] font-[400] text-[var(--color-gray-400)]">No payments yet</p>
+          <p className="text-[13px] font-[400] text-[var(--color-gray-500)] mt-1">Create one to get started.</p>
         </div>
       </div>
     );
@@ -95,8 +95,8 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
       <div className="flex items-center justify-between gap-4 mb-5">
         <div className="flex items-center gap-2 shrink-0">
           <Database size={14} className="text-[var(--color-gray-400)]" />
-          <h2 className="text-sm font-[500] text-white">Payments</h2>
-          <span className="text-xs font-[400] text-[var(--color-gray-500)] bg-[rgba(255,255,255,0.04)] px-2 py-0.5 rounded">
+          <h2 className="text-[15px] font-[500] text-[var(--color-gray-100)]">Payments</h2>
+          <span className="text-[13px] font-[400] text-[var(--color-gray-500)] bg-[rgba(237,236,236,0.04)] px-2 py-0.5 rounded">
             {query ? `${filtered.length}/${payments.length}` : payments.length}
           </span>
         </div>
@@ -109,29 +109,29 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
             placeholder="Search by status, amount, ID, key"
             value={query}
             onChange={(e) => { setQuery(e.target.value); setPage(0); }}
-            className="w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-lg pl-7 pr-3 py-1.5 text-xs font-[400] text-[var(--color-gray-100)] placeholder:text-[var(--color-gray-500)] outline-none transition-all focus:border-[rgba(255,255,255,0.2)] focus:bg-[rgba(255,255,255,0.05)]"
+            className="w-full bg-[rgba(237,236,236,0.03)] border border-[rgba(237,236,236,0.08)] rounded-lg pl-7 pr-3 py-1.5 text-[13px] font-[400] text-[var(--color-gray-100)] placeholder:text-[var(--color-gray-500)] outline-none transition-all focus:border-[rgba(237,236,236,0.2)] focus:bg-[rgba(237,236,236,0.05)]"
           />
         </div>
       </div>
 
       {filtered.length === 0 ? (
         <div className="py-12 text-center">
-          <p className="text-sm font-[400] text-[var(--color-gray-400)]">No payments match your search.</p>
-          <button onClick={() => { setQuery(""); setPage(0); inputRef.current?.focus(); }} className="btn-ghost text-xs mt-3 py-1.5 px-3">
+          <p className="text-[15px] font-[400] text-[var(--color-gray-400)]">No payments match your search.</p>
+          <button onClick={() => { setQuery(""); setPage(0); inputRef.current?.focus(); }} className="btn-ghost text-[13px] mt-3 py-1.5 px-3">
             Clear search
           </button>
         </div>
       ) : (
         <>
           <div className="overflow-x-auto -mx-6">
-            <table className="w-full text-sm" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
+            <table className="w-full text-[15px]" style={{ borderCollapse: "separate", borderSpacing: 0 }}>
               <thead>
                 <tr>
-                  {["Status", "Amount", "ID", "Key", "Attempts", ""].map((h) => (
+                  {["STATUS", "AMOUNT", "ID", "KEY", "ATTEMPTS", ""].map((h) => (
                     <th
                       key={h}
-                      className="text-left px-6 py-3 text-xs font-[500] text-[var(--color-gray-400)] whitespace-nowrap"
-                      style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+                      className="text-left px-6 py-3 text-[13px] font-[500] text-[var(--color-gray-400)] whitespace-nowrap"
+                      style={{ borderBottom: "1px solid rgba(237,236,236,0.04)" }}
                     >
                       {h}
                     </th>
@@ -148,10 +148,10 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
                       onClick={() => onSelect(p.id)}
                       className="cursor-pointer transition-all duration-100"
                       style={{
-                        background: active ? "rgba(255,255,255,0.03)" : undefined,
-                        borderBottom: "1px solid rgba(255,255,255,0.03)",
+                        background: active ? "rgba(237,236,236,0.03)" : undefined,
+                        borderBottom: "1px solid rgba(237,236,236,0.03)",
                       }}
-                      onMouseEnter={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.015)"; (e.currentTarget as HTMLElement).style.borderBottomColor = "rgba(255,255,255,0.06)"; } }}
+                      onMouseEnter={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.background = "rgba(237,236,236,0.015)"; (e.currentTarget as HTMLElement).style.borderBottomColor = "rgba(237,236,236,0.06)"; } }}
                       onMouseLeave={(e) => { if (!active) { (e.currentTarget as HTMLElement).style.background = ""; (e.currentTarget as HTMLElement).style.borderBottomColor = ""; } }}
                     >
                       <td className="px-6 py-3">
@@ -160,20 +160,20 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
                           {meta.label}
                         </span>
                       </td>
-                      <td className="px-6 py-3 font-mono text-sm font-[500] text-white">{p.amount.toLocaleString()}</td>
-                      <td className="px-6 py-3 font-mono text-xs font-[400] text-[var(--color-gray-400)]">{p.id.slice(0, 8)}<span className="text-[var(--color-gray-600)]">…</span></td>
-                      <td className="px-6 py-3 font-mono text-xs font-[400] text-[var(--color-gray-500)] max-w-[100px] truncate" title={p.idempotency_key}>{p.idempotency_key}</td>
-                      <td className="px-6 py-3 font-mono text-xs font-[400] text-[var(--color-gray-400)]">{p.attempts}</td>
+                      <td className="px-6 py-3 font-mono text-[15px] font-[500] text-[var(--color-gray-100)]">{p.amount.toLocaleString()}</td>
+                      <td className="px-6 py-3 font-mono text-[13px] font-[400] text-[var(--color-gray-400)]">{p.id.slice(0, 8)}<span className="text-[var(--color-gray-600)]">…</span></td>
+                      <td className="px-6 py-3 font-mono text-[13px] font-[400] text-[var(--color-gray-500)] max-w-[100px] truncate" title={p.idempotency_key}>{p.idempotency_key}</td>
+                      <td className="px-6 py-3 font-mono text-[13px] font-[400] text-[var(--color-gray-400)]">{p.attempts}</td>
                       <td className="px-6 py-3 text-right">
                         {p.status === "failed_retryable" || p.status === "failed_final" ? (
-                          <button onClick={(e) => handleRetry(p.id, e)} className="btn-ghost text-xs py-1.5 px-2.5">
+                          <button onClick={(e) => handleRetry(p.id, e)} className="btn-ghost text-[13px] py-1.5 px-2.5">
                             <RotateCcw size={11} />
                             Retry
                           </button>
                         ) : p.status === "pending" ? (
-                          <span className="text-xs font-[400] text-[var(--color-gray-500)]">queued</span>
+                          <span className="text-[13px] font-[400] text-[var(--color-gray-500)]">queued</span>
                         ) : (
-                          <span className="text-xs font-[400] text-[var(--color-gray-600)]">—</span>
+                          <span className="text-[13px] font-[400] text-[var(--color-gray-600)]">—</span>
                         )}
                       </td>
                     </tr>
@@ -184,8 +184,8 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
           </div>
 
           {showPagination && (
-            <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-              <span className="text-xs font-[400] text-[var(--color-gray-500)]">
+            <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: "1px solid rgba(237,236,236,0.04)" }}>
+              <span className="text-[13px] font-[400] text-[var(--color-gray-500)]">
                 {safePage * PER_PAGE + 1}–{Math.min((safePage + 1) * PER_PAGE, filtered.length)} of {filtered.length}
               </span>
               <div className="flex items-center gap-1.5">
@@ -196,7 +196,7 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
                 >
                   <ChevronLeft size={14} />
                 </button>
-                <span className="text-xs font-[400] text-[var(--color-gray-400)] px-2">
+                <span className="text-[13px] font-[400] text-[var(--color-gray-400)] px-2">
                   {safePage + 1} <span className="text-[var(--color-gray-600)]">/ {totalPages}</span>
                 </span>
                 <button
@@ -214,3 +214,4 @@ export default function PaymentsTable({ payments, selectedId, onSelect, onUpdate
     </div>
   );
 }
+

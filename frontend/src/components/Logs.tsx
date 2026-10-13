@@ -138,16 +138,16 @@ function round(v: number): string {
 }
 
 function ValueDisplay({ value }: { value: number }) {
-  return <span className="font-mono text-xs font-[500] text-white">{round(value)}</span>;
+  return <span className="font-mono text-[13px] font-[500] text-[var(--color-gray-100)]">{round(value)}</span>;
 }
 
 function SampleRow({ sample }: { sample: Sample }) {
   const entries = Object.entries(sample.labels);
   return (
-    <div className="flex items-center justify-between py-1.5 px-3 border-b border-[rgba(255,255,255,0.02)] last:border-0">
+    <div className="flex items-center justify-between py-1.5 px-3 border-b border-[rgba(237,236,236,0.02)] last:border-0">
       <div className="flex items-center gap-2 flex-wrap">
         {entries.map(([k, v]) => (
-          <span key={k} className="text-xs font-[400] text-[var(--color-gray-400)]">
+          <span key={k} className="text-[13px] font-[400] text-[var(--color-gray-400)]">
             <span className="text-[var(--color-gray-500)]">{alias(k)}</span>
             <span className="text-[var(--color-gray-200)] ml-1">{v}</span>
           </span>
@@ -161,24 +161,24 @@ function SampleRow({ sample }: { sample: Sample }) {
 const TYPE_BADGES: Record<string, string> = {
   counter: "bg-[rgba(56,189,248,0.08)] text-[var(--color-sky)]",
   gauge: "bg-[rgba(245,158,11,0.08)] text-[var(--color-amber)]",
-  histogram: "bg-[rgba(168,85,247,0.08)] text-purple-400",
+  histogram: "bg-[rgba(237,236,236,0.06)] text-[var(--color-gray-100)]",
   summary: "bg-[rgba(187,247,208,0.08)] text-[var(--color-green)]",
 };
 
 function MetricCard({ metric }: { metric: Metric }) {
-  const badge = TYPE_BADGES[metric.type] ?? "bg-[rgba(255,255,255,0.04)] text-[var(--color-gray-400)]";
+  const badge = TYPE_BADGES[metric.type] ?? "bg-[rgba(237,236,236,0.04)] text-[var(--color-gray-400)]";
   return (
     <div className="card-subtle p-4">
       <div className="flex items-start justify-between mb-1.5">
         <div>
-          <span className="font-mono text-sm font-[500] text-white">{metric.name}</span>
-          <span className={`ml-2 text-[10px] font-[500] px-1.5 py-0.5 rounded ${badge}`}>{metric.type}</span>
+          <span className="font-mono text-[15px] font-[500] text-[var(--color-gray-100)]">{metric.name}</span>
+          <span className={`ml-2 text-[11px] font-[500] px-1.5 py-0.5 rounded ${badge}`}>{metric.type}</span>
         </div>
       </div>
       {metric.help && (
-        <p className="text-xs font-[400] text-[var(--color-gray-500)] mb-2.5 leading-relaxed">{metric.help}</p>
+        <p className="text-[13px] font-[400] text-[var(--color-gray-500)] mb-2.5 leading-relaxed">{metric.help}</p>
       )}
-      <div className="rounded-md" style={{ background: "rgba(255,255,255,0.015)" }}>
+      <div className="rounded-md" style={{ background: "rgba(237,236,236,0.015)" }}>
         {metric.samples.map((s, i) => (
           <SampleRow key={i} sample={s} />
         ))}
@@ -191,7 +191,7 @@ function CategorySection({ category }: { category: Category }) {
   if (category.metrics.length === 0) return null;
   return (
     <div className="mb-8">
-      <h2 className="text-sm font-[500] text-white mb-3 tracking-tight">{category.name}</h2>
+      <h2 className="text-[15px] font-[500] text-[var(--color-gray-100)] mb-3 tracking-tight">{category.name}</h2>
       <div className="grid grid-cols-1 gap-2">
         {category.metrics.map((m) => (
           <MetricCard key={m.name} metric={m} />
@@ -251,13 +251,13 @@ export default function Logs() {
     <main className="max-w-7xl mx-auto px-6 py-8">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-base font-[500] text-white tracking-tight">Metrics</h1>
-          <p className="text-xs font-[400] text-[var(--color-gray-500)] mt-1">
+          <h1 className="text-[17px] font-[500] text-[var(--color-gray-100)] tracking-tight">Metrics</h1>
+          <p className="text-[13px] font-[400] text-[var(--color-gray-500)] mt-1">
             {totalMetrics} metrics · {totalSamples} data points
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs font-[400] text-[var(--color-gray-500)]">Auto-refresh 10s</span>
+          <span className="text-[13px] font-[400] text-[var(--color-gray-500)]">Auto-refresh 10s</span>
           <button onClick={load} className="btn-ghost-muted p-1.5" title="Refresh now">
             <RefreshCw size={13} style={refreshing ? { animation: "spin-slow 0.8s linear infinite" } : undefined} />
           </button>
@@ -267,14 +267,14 @@ export default function Logs() {
       {error && (
         <div className="card p-5 mb-6 flex items-center gap-3 border-[rgba(239,68,68,0.15)]">
           <AlertTriangle size={14} className="text-[var(--color-red)]" />
-          <span className="text-sm font-[400] text-[var(--color-red)]">{error}</span>
-          <button onClick={load} className="btn-ghost text-xs ml-auto py-1.5 px-3">Retry</button>
+          <span className="text-[15px] font-[400] text-[var(--color-red)]">{error}</span>
+          <button onClick={load} className="btn-ghost text-[13px] ml-auto py-1.5 px-3">Retry</button>
         </div>
       )}
 
       {categories.length === 0 && !error && (
         <div className="py-20 text-center">
-          <p className="text-sm font-[400] text-[var(--color-gray-400)]">Loading metrics…</p>
+          <p className="text-[15px] font-[400] text-[var(--color-gray-400)]">Loading metrics…</p>
         </div>
       )}
 
@@ -284,3 +284,4 @@ export default function Logs() {
     </main>
   );
 }
+

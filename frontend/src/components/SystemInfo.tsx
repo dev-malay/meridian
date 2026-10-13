@@ -40,12 +40,12 @@ export default function SystemInfo({ metricsUrl }: Props) {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-[500] text-white">System</h2>
-            <p className="text-xs font-[400] text-[var(--color-gray-400)] mt-1">Service health and configuration</p>
+            <h2 className="text-[15px] font-[500] text-[var(--color-gray-100)]">System</h2>
+            <p className="text-[13px] font-[400] text-[var(--color-gray-400)] mt-1">Service health and configuration</p>
           </div>
-          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md" style={{ background: "rgba(255,255,255,0.03)" }}>
+          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md" style={{ background: "rgba(237,236,236,0.03)" }}>
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: dotColor }} />
-            <span className="text-xs font-[400] text-[var(--color-gray-300)]">{status}</span>
+            <span className="text-[13px] font-[400] text-[var(--color-gray-300)]">{status}</span>
           </div>
         </div>
       </div>
@@ -53,8 +53,8 @@ export default function SystemInfo({ metricsUrl }: Props) {
       <div className="space-y-1">
         {items.map((item) => (
           <div key={item.label} className="flex items-center justify-between py-2">
-            <span className="text-xs font-[400] text-[var(--color-gray-400)]">{item.label}</span>
-            <span className="text-xs font-[400] text-[var(--color-gray-200)]">{item.value}</span>
+            <span className="text-[13px] font-[400] text-[var(--color-gray-400)]">{item.label}</span>
+            <span className="text-[13px] font-[400] text-[var(--color-gray-200)]">{item.value}</span>
           </div>
         ))}
       </div>
@@ -63,7 +63,7 @@ export default function SystemInfo({ metricsUrl }: Props) {
 
       <a
         href={metricsUrl} target="_blank" rel="noopener noreferrer"
-        className="mt-4 flex items-center justify-between text-xs font-[400] text-[var(--color-gray-400)] hover:text-[var(--color-gray-200)] transition-colors group"
+        className="mt-4 flex items-center justify-between text-[13px] font-[400] text-[var(--color-gray-400)] hover:text-[var(--color-gray-200)] transition-colors group"
       >
         <div className="flex items-center gap-2">
           <BarChart3 size={13} />
@@ -74,3 +74,4 @@ export default function SystemInfo({ metricsUrl }: Props) {
     </div>
   );
 }
+
